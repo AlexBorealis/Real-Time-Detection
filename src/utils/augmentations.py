@@ -2,33 +2,31 @@ import os
 import cv2
 import json
 
+from albumentations import ReplayCompose
+
 from .metrics import compute_iou
+from .utils import load_data
 
 
 # noinspection PyTypeChecker
 def process_image(
-    img_path,
-    label_path,
-    label_file,
-    preprocessed_images_dir,
-    preprocessed_labels_dir,
-    transform,
+    image_path: str,
+    label_path: str,
+    processed_images_dir: str,
+    processed_labels_dir: str,
+    transform: ReplayCompose,
     new_h=320,
     new_w=320,
 ):
-    img = cv2.imread(img_path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    with open(label_path, "r") as f:
-        labels = json.load(f)
+    image, labels = load_data(image_path, label_path)
 
     # Augmentation
-    augmented = transform(image=img)
+    augmented = transform(image=image)
     augmented_img = augmented["image"]
     replay = augmented["replay"]
 
     # Rescaling bb
-    h, w = img.shape[:2]
+    h, w = image.shape[:2]
     scale_h, scale_w = new_h / h, new_w / w
 
     # Checking augmentations
@@ -76,10 +74,12 @@ def process_image(
             frame["objects"] = new_objects
 
     # Saving results
-    img_file = os.path.basename(img_path)
+    img_file = os.path.basename(image_path)
+    label_file = img_file.replace(".jpg", ".json").replace(".png", ".json")
+
     cv2.imwrite(
-        os.path.join(preprocessed_images_dir, img_file),
+        os.path.join(processed_images_dir, img_file),
         cv2.cvtColor(augmented_img, cv2.COLOR_RGB2BGR),
     )
-    with open(os.path.join(preprocessed_labels_dir, label_file), "w") as f:
+    with open(os.path.join(processed_labels_dir, label_file), "w") as f:
         json.dump(labels, f, indent=4)
