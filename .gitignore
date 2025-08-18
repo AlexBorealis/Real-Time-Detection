@@ -1,5 +1,5 @@
 # Data of project
-data/processed/
+data/preprocessed/
 data/raw/
 
 # Byte-compiled / optimized / DLL files
