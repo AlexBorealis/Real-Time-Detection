@@ -1,7 +1,7 @@
-import os
-import cv2
 import json
+import os
 
+import cv2
 from albumentations import ReplayCompose
 
 from .metrics import compute_iou

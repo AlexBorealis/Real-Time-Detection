@@ -1,15 +1,15 @@
-# Путь к корневой директории датасета
+# Home directory
 path: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/data/processed
 
-# Разделы данных
+# Samples
 train: images/train
 val: images/val
 
-# Путь к файлам меток (YOLO format: class x_center y_center width height)
+# Samples labels
 train_labels: labels/train
 val_labels: labels/val
 
-# Классы
+# Classes
 names:
   0: person
   1: car
@@ -20,5 +20,5 @@ names:
   6: bicycle
   7: rider
 
-# Количество классов
+# Count classes
 nc: 8
