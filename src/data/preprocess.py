@@ -18,7 +18,7 @@ load_dotenv()
 start = time.time()
 
 # Paths
-PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data/processed")
+PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
 
 # Creation Directories
 for split in ["train", "test", "val"]:
