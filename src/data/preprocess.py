@@ -68,10 +68,10 @@ for split in ["train", "test", "val"]:
 print(f"Time {time.time() - start}")
 
 
-for split in ['train', 'val', 'test']:
+for split in ["train", "val", "test"]:
     convert_labels(
-        os.path.join(PROCESSED_DIR, 'labels', split),
-        os.path.join(PROCESSED_DIR, 'labels', split)
+        os.path.join(PROCESSED_DIR, "labels", split),
+        os.path.join(PROCESSED_DIR, "labels", split),
     )
 
 print(f"Time {time.time() - start}")
