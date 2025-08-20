@@ -1,3 +1,6 @@
+# Different files
+*.txt
+
 # Models structure
 args.yaml
 
