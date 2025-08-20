@@ -3,6 +3,7 @@ args.yaml
 
 # Models
 *.pt
+*.csv
 
 # Images
 *.png
