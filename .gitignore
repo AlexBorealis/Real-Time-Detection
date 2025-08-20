@@ -1,3 +1,14 @@
+# Models structure
+args.yaml
+
+# Models
+*.pt
+
+# Images
+*.png
+*.jpeg
+*.jpg
+
 # Data of project
 data/processed/
 data/raw/
