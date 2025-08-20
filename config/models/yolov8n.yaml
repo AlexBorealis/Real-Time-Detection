@@ -1,0 +1,2 @@
+model_name: "yolov8n.pt"
+results_model_name: "yolo_baseline"
