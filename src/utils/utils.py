@@ -17,7 +17,12 @@ def load_data(img_path: str, label_path: str, rgb: bool = True):
     return image, labels
 
 
-def convert_labels(input_dir: str, output_dir: str, img_size: tuple = (320, 320)):
+def convert_labels(
+    input_dir: str,
+    output_dir: str,
+    selected_classes: list[str],
+    img_size: tuple = (320, 320),
+):
     for label_file in os.listdir(input_dir):
         if label_file.endswith(".json"):
             img_name = label_file.replace(".json", "")
@@ -27,26 +32,8 @@ def convert_labels(input_dir: str, output_dir: str, img_size: tuple = (320, 320)
             objects = frame.get("objects", [])
             with open(os.path.join(output_dir, f"{img_name}.txt"), "w") as f_out:
                 for obj in objects:
-                    if "box2d" in obj and obj["category"] in [
-                        "person",
-                        "car",
-                        "truck",
-                        "bus",
-                        "train",
-                        "motorcycle",
-                        "bicycle",
-                        "rider",
-                    ]:
-                        class_id = [
-                            "person",
-                            "car",
-                            "truck",
-                            "bus",
-                            "train",
-                            "motorcycle",
-                            "bicycle",
-                            "rider",
-                        ].index(obj["category"])
+                    if "box2d" in obj and obj["category"] in selected_classes:
+                        class_id = selected_classes.index(obj["category"])
                         x1, y1, x2, y2 = (
                             obj["box2d"]["x1"],
                             obj["box2d"]["y1"],
