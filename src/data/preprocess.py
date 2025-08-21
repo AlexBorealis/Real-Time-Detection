@@ -11,7 +11,6 @@ from albumentations import (
 from dotenv import load_dotenv
 
 from src.utils.augmentations import process_image
-from src.utils.utils import convert_labels
 
 load_dotenv()
 
@@ -64,14 +63,5 @@ for split in ["train", "test", "val"]:
         # Clearing memory after batch
         batch_files = None
         gc.collect()
-
-print(f"Time {time.time() - start}")
-
-
-for split in ["train", "val", "test"]:
-    convert_labels(
-        os.path.join(PROCESSED_DIR, "labels", split),
-        os.path.join(PROCESSED_DIR, "labels", split),
-    )
 
 print(f"Time {time.time() - start}")
