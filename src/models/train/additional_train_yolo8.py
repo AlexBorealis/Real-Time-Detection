@@ -25,6 +25,7 @@ PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["additional_project_results_name"]
 )
 DATA_DIR = os.path.join(os.getenv("HOME_DIR"), "config", "datasets", "bdd100k.yaml")
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
 # Get model
 model_path = os.path.join(
@@ -43,7 +44,7 @@ results = model.train(
     data=DATA_DIR,
     project=PROJECT_DIR,
     epochs=5,
-    imgsz=os.getenv("HEIGHT"),
+    imgsz=IMG_SIZE[0],
     batch=8,
     exist_ok=True,
     patience=10,

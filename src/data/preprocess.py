@@ -18,6 +18,7 @@ start = time.time()
 
 # Paths
 PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
 # Creation Directories
 for split in ["train", "test", "val"]:
@@ -28,7 +29,7 @@ for split in ["train", "test", "val"]:
 # noinspection PyTypeChecker
 transform = ReplayCompose(
     [
-        Resize(height=os.getenv("HEIGHT"), width=os.getenv("WIDTH")),
+        Resize(height=IMG_SIZE[0], width=IMG_SIZE[1]),
         GaussNoise(p=0.5, std_range=(0.1, 0.1)),
         CoarseDropout(p=0.5, num_holes_range=(1, 3), hole_height_range=(8, 32)),
     ]
@@ -59,8 +60,8 @@ for split in ["train", "test", "val"]:
                 processed_images_dir,
                 processed_labels_dir,
                 transform,
-                new_h=os.getenv("HEIGHT"),
-                new_w=os.getenv("WIDTH")
+                new_h=IMG_SIZE[0],
+                new_w=IMG_SIZE[1]
             )
 
         # Clearing memory after batch

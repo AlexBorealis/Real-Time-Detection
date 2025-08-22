@@ -24,6 +24,7 @@ PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
 )
 DATA_DIR = os.path.join(os.getenv("HOME_DIR"), "config", "datasets", "bdd100k.yaml")
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
 # Modify labels from .json to .txt
 for split in ["train", "val", "test"]:
@@ -31,7 +32,7 @@ for split in ["train", "val", "test"]:
         os.path.join(PROCESSED_DIR, "labels", split),
         os.path.join(PROCESSED_DIR, "labels", split),
         args["selected_classes"],
-        img_size=(os.getenv("HEIGHT"), os.getenv("WIDTH"))
+        img_size=IMG_SIZE
     )
 
 # Get model
@@ -42,7 +43,7 @@ results = model.train(
     data=DATA_DIR,
     project=PROJECT_DIR,
     epochs=100,
-    imgsz=os.getenv("HEIGHT"),
+    imgsz=IMG_SIZE[0],
     batch=8,
     exist_ok=True,
     device=-1,
