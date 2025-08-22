@@ -4,8 +4,6 @@ import yaml
 from dotenv import load_dotenv
 from ultralytics import YOLO
 
-from src.utils.utils import convert_labels
-
 load_dotenv()
 
 # Set directory
@@ -13,39 +11,41 @@ os.chdir(os.getenv("HOME_DIR"))
 
 # Set model.yaml path
 yaml_path = os.path.join(
-    os.getenv("HOME_DIR"), "config", "models", "yolo8_baseline.yaml"
+    os.getenv("HOME_DIR"),
+    "config",
+    "models",
+    "yolo8_baseline.yaml",  # Change on different model
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
-# Set directories path for training
+# Directories
 PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
 PROJECT_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
+    os.getenv("HOME_DIR"), "results", "models", args["additional_project_results_name"]
 )
 DATA_DIR = os.path.join(os.getenv("HOME_DIR"), "config", "datasets", "bdd100k.yaml")
 
-# Modify labels from .json to .txt
-for split in ["train", "val", "test"]:
-    convert_labels(
-        os.path.join(PROCESSED_DIR, "labels", split),
-        os.path.join(PROCESSED_DIR, "labels", split),
-        args["selected_classes"],
-        img_size=(os.getenv("HEIGHT"), os.getenv("WIDTH"))
-    )
-
 # Get model
-model = YOLO(args["model_name"], task="detect", verbose=True)
+model_path = os.path.join(
+    os.getenv("HOME_DIR"),
+    "results",
+    "models",
+    args["project_results_name"],
+    "train",
+    "weights",
+    "best.pt",
+)
+model = YOLO(model_path, task="detect", verbose=True)
 
 # Train
 results = model.train(
     data=DATA_DIR,
     project=PROJECT_DIR,
-    epochs=100,
+    epochs=5,
     imgsz=os.getenv("HEIGHT"),
     batch=8,
     exist_ok=True,
-    device=-1,
     patience=10,
     optimizer="AdamW",
     plots=True,

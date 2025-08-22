@@ -32,13 +32,13 @@ VISUALIZE_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
     "visualizations",
-    args["results_model_name"],
+    args["project_results_name"],
 )
 OUTPUT_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
     "visualizations",
-    args["results_model_name"],
+    args["project_results_name"],
     "comparison",
 )
 
@@ -47,7 +47,7 @@ model_path = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
     "models",
-    args["results_model_name"],
+    args["project_results_name"],
     "train",
     "weights",
     "best.pt",

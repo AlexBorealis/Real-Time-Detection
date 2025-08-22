@@ -25,9 +25,10 @@ for split in ["train", "test", "val"]:
     os.makedirs(os.path.join(PROCESSED_DIR, "labels", split), exist_ok=True)
 
 # Augmentation Pipelines
+# noinspection PyTypeChecker
 transform = ReplayCompose(
     [
-        Resize(height=320, width=320),
+        Resize(height=os.getenv("HEIGHT"), width=os.getenv("WIDTH")),
         GaussNoise(p=0.5, std_range=(0.1, 0.1)),
         CoarseDropout(p=0.5, num_holes_range=(1, 3), hole_height_range=(8, 32)),
     ]
@@ -58,6 +59,8 @@ for split in ["train", "test", "val"]:
                 processed_images_dir,
                 processed_labels_dir,
                 transform,
+                new_h=os.getenv("HEIGHT"),
+                new_w=os.getenv("WIDTH")
             )
 
         # Clearing memory after batch
