@@ -1,3 +1,3 @@
 model_name: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/src/models/initial_models/yolo11n.pt
 results_model_name: yolo_baseline
-selected_classes: [person, car, motorcycle, bicycle, rider]
+selected_classes: [person, car, truck, bus, train, motorcycle, bicycle, rider]
