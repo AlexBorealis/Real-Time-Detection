@@ -34,10 +34,7 @@ for split in ["train", "val", "test"]:
     )
 
 # Get model
-model_path = os.path.join(
-    os.getenv("HOME_DIR"), "src", "models", "initial_models", args["model_name"]
-)
-model = YOLO(model_path, task="detect", verbose=True)
+model = YOLO(args["model_name"], task="detect", verbose=True)
 
 # Train
 results = model.train(
@@ -45,12 +42,11 @@ results = model.train(
     project=PROJECT_DIR,
     epochs=100,
     imgsz=320,
+    batch=8,
     exist_ok=True,
     device=-1,
     patience=10,
-    batch=8,
     optimizer="AdamW",
-    classes=[0, 1, 5, 6, 7],
-    cos_lr=True,
     plots=True,
+    amp=False,
 )
