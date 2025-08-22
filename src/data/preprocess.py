@@ -9,6 +9,7 @@ from albumentations import (
     Resize,
 )
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 from src.utils.augmentations import process_image
 
@@ -49,7 +50,10 @@ for split in ["train", "test", "val"]:
     for i in range(0, len(selected_img_files), batch_size_processing):
         # noinspection PyRedeclaration
         batch_files = selected_img_files[i : i + batch_size_processing]
-        for img_file in batch_files:
+        for img_file in tqdm(
+            batch_files,
+            desc=f"Processing {split} batch {i // batch_size_processing + 1}",
+        ):
             img_path = os.path.join(images_dir, img_file)
             label_file = img_file.replace(".jpg", ".json").replace(".png", ".json")
             label_path = os.path.join(labels_dir, label_file)
@@ -61,7 +65,7 @@ for split in ["train", "test", "val"]:
                 processed_labels_dir,
                 transform,
                 new_h=IMG_SIZE[0],
-                new_w=IMG_SIZE[1]
+                new_w=IMG_SIZE[1],
             )
 
         # Clearing memory after batch
