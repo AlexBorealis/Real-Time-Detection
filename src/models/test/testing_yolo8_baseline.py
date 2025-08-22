@@ -1,23 +1,46 @@
 import os
-import random
 
 import yaml
 from dotenv import load_dotenv
 from ultralytics import YOLO
+
+from src.utils.utils import generate_predicted_images
 
 load_dotenv()
 
 # Set directory
 os.chdir(os.getenv("HOME_DIR"))
 
+# Set model.yaml path
 yaml_path = os.path.join(
-    os.getenv("HOME_DIR"), "config", "models", "yolo8_baseline.yaml"
+    os.getenv("HOME_DIR"),
+    "config",
+    "models",
+    "yolo8_baseline.yaml",  # Change on different model
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
-# Set directories path for testing
-TESTING_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed", "images", "test")
+# Directories
+TESTING_IMG_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "data", "processed", "images", "test"
+)
+TESTING_LABEL_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "data", "processed", "labels", "test"
+)
+VISUALIZE_DIR = os.path.join(
+    os.getenv("HOME_DIR"),
+    "results",
+    "visualizations",
+    args["results_model_name"],
+)
+OUTPUT_DIR = os.path.join(
+    os.getenv("HOME_DIR"),
+    "results",
+    "visualizations",
+    args["results_model_name"],
+    "comparison",
+)
 
 # Get model
 model_path = os.path.join(
@@ -31,26 +54,11 @@ model_path = os.path.join(
 )
 model = YOLO(model_path, task="detect", verbose=True)
 
-# Get image for testing
-project_path = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["results_model_name"],
-)
-len_test_data = len(os.listdir(TESTING_DIR))
-image_path = os.listdir(TESTING_DIR)[random.randrange(0, len_test_data)]
-
-# Test
-prediction = model.predict(
-    source=os.path.join(
-        TESTING_DIR,
-        image_path,
-    ),
-    conf=0.25,
-    iou=0.5,
-    save=True,
-    save_txt=True,
-    project=project_path,
-    exist_ok=True,
+generate_predicted_images(
+    model,
+    images_dir=TESTING_IMG_DIR,
+    labels_dir=TESTING_LABEL_DIR,
+    project_dir=VISUALIZE_DIR,
+    output_dir=OUTPUT_DIR,
+    num_images=5,
 )
