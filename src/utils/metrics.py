@@ -3,16 +3,16 @@ import numpy as np
 
 # IOU
 def compute_iou(box1, box2):
-    if not (len(box1) == 4 and len(box2) == 4):
-        raise ValueError("Boxes must be [x1, y1, x2, y2]")
-
-    if (
-        box1[2] <= box1[0]
-        or box1[3] <= box1[1]
-        or box2[2] <= box2[0]
-        or box2[3] <= box2[1]
-    ):
-        raise ValueError("Invalid box coordinates")
+    # if not (len(box1) == 4 and len(box2) == 4):
+    #     raise ValueError("Boxes must be [x1, y1, x2, y2]")
+    #
+    # if (
+    #     box1[2] <= box1[0]
+    #     or box1[3] <= box1[1]
+    #     or box2[2] <= box2[0]
+    #     or box2[3] <= box2[1]
+    # ):
+    #     raise ValueError("Invalid box coordinates")
 
     x1 = max(box1[0], box2[0])
     y1 = max(box1[1], box2[1])
