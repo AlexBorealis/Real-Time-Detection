@@ -132,3 +132,56 @@ def generate_predicted_images(
         # Save
         output_path = os.path.join(output_dir, img_name)
         cv2.imwrite(output_path, img)
+
+
+def generate_predicted_video(
+    model,
+    video_dir: str,
+    video_name: str,
+    output_dir: str,
+    conf: float = 0.25,
+):
+    os.makedirs(output_dir, exist_ok=True)
+
+    video_path = os.path.join(video_dir, video_name)
+    video_path_out = os.path.join(output_dir, video_name.replace(".mp4", "_out.mp4"))
+
+    cap = cv2.VideoCapture(video_path)
+    ret, frame = cap.read()
+    if not ret:
+        return
+
+    h, w, _ = frame.shape
+    out = cv2.VideoWriter(
+        video_path_out,
+        cv2.VideoWriter_fourcc(*"MP4V"),
+        int(cap.get(cv2.CAP_PROP_FPS)),
+        (w, h),
+    )
+
+    while ret:
+        results = model(frame)[0]
+
+        for result in results.boxes.data.tolist():
+            x1, y1, x2, y2, score, class_id = result
+            if score > conf:
+                cv2.rectangle(
+                    frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4
+                )
+                cv2.putText(
+                    frame,
+                    results.names[int(class_id)].upper(),
+                    (int(x1), int(y1 - 10)),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1.3,
+                    (0, 255, 0),
+                    3,
+                    cv2.LINE_AA,
+                )
+
+        out.write(frame)
+        ret, frame = cap.read()
+
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
