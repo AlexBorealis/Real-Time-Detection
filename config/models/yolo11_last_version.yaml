@@ -1,4 +1,4 @@
 model_name: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/src/models/initial_models/yolo11n.pt
-project_results_name: yolo_last_version
-additional_project_results_name: yolo_last_version_additional
+project_results_name: yolo11_last_version
+additional_project_results_name: yolo11_last_version_additional
 selected_classes: [person, car, truck, bus, train, motorcycle, bicycle, rider]
