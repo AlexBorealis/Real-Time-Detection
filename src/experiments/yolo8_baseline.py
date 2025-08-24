@@ -32,11 +32,17 @@ for split in ["train", "val", "test"]:
         os.path.join(PROCESSED_DIR, "labels", split),
         os.path.join(PROCESSED_DIR, "labels", split),
         args["selected_classes"],
-        img_size=IMG_SIZE
+        img_size=IMG_SIZE,
     )
 
 # Get model
-model = YOLO(args["model_name"], task="detect", verbose=True)
+resume = False
+if not os.path.exists(PROJECT_DIR):
+    model_path = args["model_name"]
+else:
+    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+    resume = True
+model = YOLO(model_path, task="detect", verbose=True)
 
 # Train
 results = model.train(
@@ -46,6 +52,7 @@ results = model.train(
     imgsz=IMG_SIZE[0],
     batch=8,
     exist_ok=True,
+    resume=resume,
     device=-1,
     patience=10,
     optimizer="AdamW",

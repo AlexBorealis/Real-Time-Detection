@@ -43,12 +43,9 @@ model = YOLO(model_path, task="detect", verbose=True)
 results = model.train(
     data=DATA_DIR,
     project=PROJECT_DIR,
-    epochs=5,
+    epochs=10,
     imgsz=IMG_SIZE[0],
-    batch=8,
     exist_ok=True,
-    patience=10,
-    optimizer="AdamW",
     plots=True,
     amp=False,
 )

@@ -60,5 +60,5 @@ generate_predicted_images(
     labels_dir=TESTING_LABEL_DIR,
     project_dir=VISUALIZE_DIR,
     output_dir=OUTPUT_DIR,
-    num_images=5,
+    num_images=20,
 )
