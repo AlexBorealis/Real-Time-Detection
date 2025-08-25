@@ -4,10 +4,7 @@ import yaml
 from dotenv import load_dotenv
 from ultralytics import YOLO
 
-from src.utils.utils import generate_predicted_images
-
 load_dotenv()
-
 # Set directory
 os.chdir(os.getenv("HOME_DIR"))
 
@@ -22,36 +19,20 @@ yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
     "models",
-    handle_model_yaml,
+    handle_model_yaml,  # handle_model.yaml
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
 
 # Directories
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
+PROJECT_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
+)
 TESTING_IMG_DIR = os.path.join(
     os.getenv("HOME_DIR"), "data", "processed", "images", "test"
 )  # Testing images directory
-TESTING_LABEL_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "processed", "labels", "test"
-)  # Testing labels directory
-VISUALIZE_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-)  # Directory for visualizations
-OUTPUT_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-    "comparison",
-)  # Result directory
-PROJECT_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
-)  # Directory for saving results (logs, images, models)
-
 
 # Load model
 model_path = os.path.join(
@@ -66,15 +47,10 @@ if not os.path.exists(model_path):
         "weights",
         "best.pt",
     )
+
 model = YOLO(model_path, task="detect", verbose=True)
-
-
-# Predict
-generate_predicted_images(
-    model,
-    images_dir=TESTING_IMG_DIR,
-    labels_dir=TESTING_LABEL_DIR,
-    project_dir=VISUALIZE_DIR,
-    output_dir=OUTPUT_DIR,
-    num_images=20,
+onnx_path = model.export(
+    format="onnx",
+    imgsz=IMG_SIZE[0],
+    dynamic=False,
 )

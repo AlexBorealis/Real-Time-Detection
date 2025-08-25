@@ -1,11 +1,11 @@
 import os
-import random
 
+import torch
+import torch.nn as nn
 import yaml
 from dotenv import load_dotenv
+from torch.nn.utils import prune
 from ultralytics import YOLO
-
-from src.utils.utils import generate_predicted_video
 
 load_dotenv()
 
@@ -30,44 +30,44 @@ with open(yaml_path, "r") as file:
 
 
 # Set directories path for training
-OUTPUT_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-    "videos",
-)  # Result directory
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
+PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
 PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
 )  # Directory for saving results (logs, images, models)
-TESTING_VIDEO_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "raw", "videos", "BDDA", "test", "camera_videos"
-)  # Test directory
-VIDEO_NAME = os.listdir(TESTING_VIDEO_DIR)[
-    random.randint(0, len(os.listdir(TESTING_VIDEO_DIR)))
-]  # Video file name
+OUTPUT_DIR = os.path.join(
+    PROJECT_DIR,
+    "optimized",
+)  # Result directory
 
 
 # Load model
 model_path = os.path.join(
     PROJECT_DIR,
-    "optimized",
-    "best_optimized.pt",
+    "train",
+    "weights",
+    "best.pt",
 )
-if not os.path.exists(model_path):
-    model_path = os.path.join(
-        PROJECT_DIR,
-        "train",
-        "weights",
-        "best.pt",
-    )
 model = YOLO(model_path, task="detect", verbose=True)
 
 
-# Predict
-generate_predicted_video(
-    model,
-    video_dir=TESTING_VIDEO_DIR,
-    output_dir=OUTPUT_DIR,
-    video_name=VIDEO_NAME,
+# Pruning 0.1 weights
+for name, module in model.model.named_modules():
+    if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
+        prune.l1_unstructured(module, name="weight", amount=0.1)
+        prune.remove(module, "weight")
+
+
+# Saving model
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+ckpt = {
+    "model": model.model,
+    "train_args": {},
+}
+torch.save(
+    ckpt,
+    os.path.join(
+        OUTPUT_DIR,
+        "best_optimized.pt",
+    ),
 )

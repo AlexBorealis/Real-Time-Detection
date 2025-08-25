@@ -39,6 +39,7 @@ DATA_DIR = os.path.join(
 )  # Default dataset_name.yaml or personal_dataset_name.yaml
 IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
+
 # Modify labels from .json to .txt
 for split in ["train", "val", "test"]:
     convert_labels(
@@ -57,6 +58,7 @@ else:
     model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
     resume = True
 model = YOLO(model_path, task="detect", verbose=True)
+
 
 # Train
 try:

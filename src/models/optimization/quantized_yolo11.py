@@ -1,11 +1,10 @@
 import os
-import random
 
+import torch
 import yaml
 from dotenv import load_dotenv
+from torch.quantization import quantize_dynamic
 from ultralytics import YOLO
-
-from src.utils.utils import generate_predicted_video
 
 load_dotenv()
 
@@ -30,44 +29,41 @@ with open(yaml_path, "r") as file:
 
 
 # Set directories path for training
-OUTPUT_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-    "videos",
-)  # Result directory
 PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
 )  # Directory for saving results (logs, images, models)
-TESTING_VIDEO_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "raw", "videos", "BDDA", "test", "camera_videos"
-)  # Test directory
-VIDEO_NAME = os.listdir(TESTING_VIDEO_DIR)[
-    random.randint(0, len(os.listdir(TESTING_VIDEO_DIR)))
-]  # Video file name
+OUTPUT_DIR = os.path.join(
+    PROJECT_DIR,
+    "optimized",
+)  # Result directory
 
 
 # Load model
 model_path = os.path.join(
     PROJECT_DIR,
-    "optimized",
-    "best_optimized.pt",
+    "train",
+    "weights",
+    "best.pt",
 )
-if not os.path.exists(model_path):
-    model_path = os.path.join(
-        PROJECT_DIR,
-        "train",
-        "weights",
-        "best.pt",
-    )
 model = YOLO(model_path, task="detect", verbose=True)
 
 
-# Predict
-generate_predicted_video(
-    model,
-    video_dir=TESTING_VIDEO_DIR,
-    output_dir=OUTPUT_DIR,
-    video_name=VIDEO_NAME,
+# Quantization to int8
+quantized_model = quantize_dynamic(
+    model.model, {torch.nn.Conv2d, torch.nn.Linear}, dtype=torch.qint8
+)
+
+
+# Saving model
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+ckpt = {
+    "model": model.model,
+    "train_args": {},
+}
+torch.save(
+    ckpt,
+    os.path.join(
+        OUTPUT_DIR,
+        "best_optimized.pt",
+    ),
 )
