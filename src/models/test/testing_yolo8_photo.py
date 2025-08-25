@@ -17,44 +17,57 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
+handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
 yaml_path = os.path.join(
-    os.getenv("HOME_DIR"), "config", "models", "yolo8_baseline.yaml"
+    os.getenv("HOME_DIR"),
+    "config",
+    "models",
+    handle_model_yaml,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
+
 # Directories
 TESTING_IMG_DIR = os.path.join(
     os.getenv("HOME_DIR"), "data", "processed", "images", "test"
-) # Testing images directory
+)  # Testing images directory
 TESTING_LABEL_DIR = os.path.join(
     os.getenv("HOME_DIR"), "data", "processed", "labels", "test"
-) # Testing labels directory
+)  # Testing labels directory
 VISUALIZE_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
     "visualizations",
     args["project_results_name"],
-) # Directory for visualizations
+)  # Directory for visualizations
 OUTPUT_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
     "visualizations",
     args["project_results_name"],
     "comparison",
-) # Result directory
+)  # Result directory
+PROJECT_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
+)  # Directory for saving results (logs, images, models)
 
-# Get model
+
+# Load model
 model_path = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "models",
-    args["project_results_name"],
-    "train",
-    "weights",
-    "best.pt",
+    PROJECT_DIR,
+    "optimized",
+    "best_optimized.pt",
 )
+if not os.path.exists(model_path):
+    model_path = os.path.join(
+        PROJECT_DIR,
+        "train",
+        "weights",
+        "best.pt",
+    )
 model = YOLO(model_path, task="detect", verbose=True)
+
 
 # Predict
 generate_predicted_images(

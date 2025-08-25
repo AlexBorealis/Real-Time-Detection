@@ -20,34 +20,51 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
+handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
+dataset_yaml = "bdd100k.yaml"
 yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
     "models",
-    "yolo8_baseline.yaml",  # handle_model.yaml
+    handle_model_yaml,  # handle_model.yaml
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
+
 # Directories
+DATA_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "config", "datasets", dataset_yaml
+)  # Default dataset_name.yaml or personal_dataset_name.yaml
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
 )
-DATA_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "config", "datasets", "bdd100k.yaml"
-)  # Default dataset_name.yaml or personal_dataset_name.yaml
-IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 TESTING_IMG_DIR = os.path.join(
     os.getenv("HOME_DIR"), "data", "processed", "images", "test"
 )  # Testing images directory
 
+
 # Models
-onnx_path = os.path.join(PROJECT_DIR, "train", "weights", "best.onnx")
-best_model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+onnx_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.onnx")
+best_model_path = os.path.join(
+    PROJECT_DIR,
+    "optimized",
+    "best_optimized.pt",
+)
+if not os.path.exists(best_model_path) and not os.path.exists(onnx_path):
+    onnx_path = os.path.join(PROJECT_DIR, "train", "weights", "best.onnx")
+    best_model_path = os.path.join(
+        PROJECT_DIR,
+        "train",
+        "weights",
+        "best.pt",
+    )
 
 # Measure model size
 model_size = os.path.getsize(onnx_path) / (1024 * 1024)  # Size in MB
 print(f"Model size: {model_size:.2f} MB")
+
 
 # Load ONNX model on CPU
 sess = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
@@ -57,6 +74,7 @@ image_path = os.path.join(
 )
 result = fps(sess, image_path)
 print(f"FPS on CPU (edge simulation): {result['fps']}")
+
 
 # Calculate metric maP@50
 best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
@@ -71,6 +89,7 @@ metrics = best_model.val(
 )
 map50 = metrics.box.map50
 print(f"mAP@0.5: {map50:.4f}")
+
 
 # Get profile on CPU time
 with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU]) as prof:

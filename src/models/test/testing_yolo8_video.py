@@ -18,16 +18,18 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
+handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
 yaml_path = os.path.join(
-    os.getenv("HOME_DIR"), "config", "models", "yolo8_baseline.yaml"
+    os.getenv("HOME_DIR"),
+    "config",
+    "models",
+    handle_model_yaml,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
+
 # Set directories path for training
-TESTING_VIDEO_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "raw", "videos", "BDDA", "test", "camera_videos"
-)  # Test directory
 OUTPUT_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
@@ -35,17 +37,24 @@ OUTPUT_DIR = os.path.join(
     args["project_results_name"],
     "videos",
 )  # Result directory
-VIDEO_NAME = os.listdir(TESTING_VIDEO_DIR)[
-    random.randint(0, len(os.listdir(TESTING_VIDEO_DIR)))
-]  # Video file name
 PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
 )  # Directory for saving results (logs, images, models)
+TESTING_VIDEO_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "data", "raw", "videos", "BDDA", "test", "camera_videos"
+)  # Test directory
+VIDEO_NAME = os.listdir(TESTING_VIDEO_DIR)[
+    random.randint(0, len(os.listdir(TESTING_VIDEO_DIR)))
+]  # Video file name
 
-# Load a model
-if not os.path.exists(PROJECT_DIR):
-    model_path = os.path.join(os.getenv("HOME_DIR"), "best_optimized.pt")
-else:
+
+# Load model
+model_path = os.path.join(
+    PROJECT_DIR,
+    "optimized",
+    "best_optimized.pt",
+)
+if not os.path.exists(model_path):
     model_path = os.path.join(
         PROJECT_DIR,
         "train",
@@ -53,6 +62,7 @@ else:
         "best.pt",
     )
 model = YOLO(model_path, task="detect", verbose=True)
+
 
 # Predict
 generate_predicted_video(

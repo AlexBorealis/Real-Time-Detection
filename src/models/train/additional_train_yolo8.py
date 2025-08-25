@@ -15,38 +15,47 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
+handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
+dataset_yaml = "bdd100k.yaml"
 yaml_path = os.path.join(
-    os.getenv("HOME_DIR"), "config", "models", "yolo8_baseline.yaml"
+    os.getenv("HOME_DIR"),
+    "config",
+    "models",
+    handle_model_yaml,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
+
 # Set directories path for training
-PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
-PROJECT_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
-)
 DATA_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "config", "datasets", "bdd100k.yaml"
+    os.getenv("HOME_DIR"), "config", "datasets", dataset_yaml
 )  # Default dataset_name.yaml or personal_dataset_name.yaml
 IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
+PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
+PROJECT_DIR = os.path.join(os.getenv("HOME_DIR"), "results", "models", "optimized")
 
-# Get model
+
+# Load model
 resume = False
-if not os.path.exists(PROJECT_DIR):
-    model_path = os.path.join(os.getenv("HOME_DIR"), "best_optimized.pt")
-else:
+model_path = os.path.join(
+    PROJECT_DIR,
+    "optimized",
+    "best_optimized.pt",
+)
+if not os.path.exists(model_path):
     model_path = os.path.join(
         os.getenv("HOME_DIR"),
         "results",
         "models",
-        args["optimized_project_results_name"],
+        args["project_results_name"],
         "train",
         "weights",
         "best.pt",
     )
     resume = True
 model = YOLO(model_path, task="detect", verbose=True)
+
 
 # Train
 try:

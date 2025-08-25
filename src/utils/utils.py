@@ -201,5 +201,5 @@ def sparsity(model):
     a, b = 0, 0
     for p in model.parameters():
         a += p.numel()
-        b += (p == 0).to(torch.int).sum() # type: ignore
+        b += (p == 0).to(torch.int).sum()  # type: ignore
     return b / a

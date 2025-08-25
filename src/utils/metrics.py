@@ -59,5 +59,5 @@ def fps(sess: InferenceSession, image_path: str):
 
     return {
         "fps": 1 / avg_time,  # type: ignore
-        "real_input": real_input
+        "real_input": real_input,
     }
