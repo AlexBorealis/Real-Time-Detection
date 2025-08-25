@@ -1,19 +1,13 @@
+import time
+
 import numpy as np
+from onnxruntime import InferenceSession
+
+from src.utils.utils import load_image
 
 
 # IOU
 def compute_iou(box1, box2):
-    # if not (len(box1) == 4 and len(box2) == 4):
-    #     raise ValueError("Boxes must be [x1, y1, x2, y2]")
-    #
-    # if (
-    #     box1[2] <= box1[0]
-    #     or box1[3] <= box1[1]
-    #     or box2[2] <= box2[0]
-    #     or box2[3] <= box2[1]
-    # ):
-    #     raise ValueError("Invalid box coordinates")
-
     x1 = max(box1[0], box2[0])
     y1 = max(box1[1], box2[1])
     x2 = min(box1[2], box2[2])
@@ -45,3 +39,25 @@ def compute_map(pred_bboxes, true_bboxes, iou_threshold=0.5):
         ap += p / 11
 
     return ap
+
+
+# Compute FPS
+def fps(sess: InferenceSession, image_path: str):
+    input_name = sess.get_inputs()[0].name
+
+    # Prepare real input
+    real_input = np.expand_dims(
+        load_image(image_path).transpose((2, 0, 1)) / 255.0, axis=0
+    ).astype(np.float32)
+
+    times = []
+    for _ in range(100):
+        start = time.time()
+        _ = sess.run(None, {input_name: real_input})
+        times.append(time.time() - start)
+    avg_time = np.mean(times)
+
+    return {
+        "fps": 1 / avg_time,  # type: ignore
+        "real_input": real_input
+    }
