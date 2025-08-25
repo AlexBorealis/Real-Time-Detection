@@ -3,17 +3,27 @@ import os
 import random
 
 import cv2
+import torch
+from tqdm import tqdm
 
 
-def load_data(img_path: str, label_path: str, rgb: bool = True):
+def load_image(img_path: str, rgb: bool = True):
     if rgb:
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     else:
         image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-    with open(label_path, "r") as f:
-        labels = json.load(f)
+    return image
+
+
+def load_data(img_path: str, label_path: str, rgb: bool = True):
+    image = load_image(img_path) if rgb else load_image(img_path, rgb=False)
+
+    labels = None
+    if os.path.exists(label_path):
+        with open(label_path, "r") as f:
+            labels = json.load(f)
 
     return image, labels
 
@@ -24,7 +34,7 @@ def convert_labels(
     selected_classes: list[str],
     img_size: tuple = (320, 320),
 ):
-    for label_file in os.listdir(input_dir):
+    for label_file in tqdm(os.listdir(input_dir), desc="Converting labels"):
         if label_file.endswith(".json"):
             img_name = label_file.replace(".json", "")
             with open(os.path.join(input_dir, label_file), "r") as f:
@@ -185,3 +195,11 @@ def generate_predicted_video(
     cap.release()
     out.release()
     cv2.destroyAllWindows()
+
+
+def sparsity(model):
+    a, b = 0, 0
+    for p in model.parameters():
+        a += p.numel()
+        b += (p == 0).to(torch.int).sum() # type: ignore
+    return b / a
