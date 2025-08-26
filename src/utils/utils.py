@@ -164,7 +164,7 @@ def generate_predicted_video(
     h, w, _ = frame.shape
     out = cv2.VideoWriter(
         video_path_out,
-        cv2.VideoWriter_fourcc(*"MP4V"),
+        cv2.VideoWriter_fourcc(*"MP4V"),  # type: ignore
         int(cap.get(cv2.CAP_PROP_FPS)),
         (w, h),
     )
