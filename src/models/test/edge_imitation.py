@@ -26,7 +26,7 @@ yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
     "models",
-    handle_model_yaml,  # handle_model.yaml
+    handle_model_yaml,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
@@ -45,7 +45,7 @@ TESTING_IMG_DIR = os.path.join(
 )  # Testing images directory
 
 
-# Models
+# Load models
 onnx_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.onnx")
 best_model_path = os.path.join(
     PROJECT_DIR,
@@ -63,7 +63,7 @@ if not os.path.exists(best_model_path) and not os.path.exists(onnx_path):
 best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
 
 # Measure model size
-model_size = os.path.getsize(onnx_path) / (1024 * 1024)  # Size in MB
+model_size = os.path.getsize(onnx_path) / (1024 * 1024)
 print(f"Model size: {model_size:.2f} MB")
 
 
