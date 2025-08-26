@@ -60,6 +60,7 @@ if not os.path.exists(best_model_path) and not os.path.exists(onnx_path):
         "weights",
         "best.pt",
     )
+best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
 
 # Measure model size
 model_size = os.path.getsize(onnx_path) / (1024 * 1024)  # Size in MB
@@ -73,25 +74,19 @@ image_path = os.path.join(
     os.listdir(TESTING_IMG_DIR)[random.randint(0, len(os.listdir(TESTING_IMG_DIR)))],
 )
 result = fps(sess, image_path)
-print(f"FPS on CPU (edge simulation): {result['fps']}")
-
-
-# Calculate metric maP@50
-best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
-real_input_torch = torch.from_numpy(
-    result["real_input"].transpose((0, 2, 3, 1))
-).permute(0, 3, 1, 2)
-metrics = best_model.val(
-    data=DATA_DIR,
-    imgsz=IMG_SIZE[0],
-    split="val",
-    project=PROJECT_DIR,
+print(f"FPS on CPU (edge simulation): {round(result['fps'], 3)}")
+print(f"Min time inference {round(min(result['times']) * 1000, 3)} ms")
+print(
+    f"Mean time inference {round(sum(result['times']) / len(result['times']) * 1000, 3)} ms"
 )
-map50 = metrics.box.map50
-print(f"mAP@0.5: {map50:.4f}")
+print(f"Max time inference {round(max(result['times']) * 1000, 3)} ms")
 
 
 # Get profile on CPU time
+real_input_torch = torch.from_numpy(
+    result["real_input"].transpose((0, 2, 3, 1))
+).permute(0, 3, 1, 2)
+
 with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU]) as prof:
     best_model(real_input_torch)
 print(prof.key_averages().table(sort_by="self_cpu_time_total"))

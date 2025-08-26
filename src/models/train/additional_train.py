@@ -4,8 +4,6 @@ import yaml
 from dotenv import load_dotenv
 from ultralytics import YOLO
 
-from src.utils.utils import generate_predicted_images
-
 load_dotenv()
 
 # Set directory
@@ -17,7 +15,8 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
-handle_model_yaml = "yolo11_last_version.yaml"  # handle_model.yaml
+handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
+dataset_yaml = "bdd100k.yaml"
 yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
@@ -28,32 +27,19 @@ with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
 
 
-# Directories
-TESTING_IMG_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "processed", "images", "test"
-)  # Testing images directory
-TESTING_LABEL_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "data", "processed", "labels", "test"
-)  # Testing labels directory
-VISUALIZE_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-)  # Directory for visualizations
-OUTPUT_DIR = os.path.join(
-    os.getenv("HOME_DIR"),
-    "results",
-    "visualizations",
-    args["project_results_name"],
-    "comparison",
-)  # Result directory
+# Set directories path for training
+DATA_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "config", "datasets", dataset_yaml
+)  # Default dataset_name.yaml or personal_dataset_name.yaml
+IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
+PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
 PROJECT_DIR = os.path.join(
     os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
-)  # Directory for saving results (logs, images, models)
+)
 
 
 # Load model
+resume = False
 model_path = os.path.join(
     PROJECT_DIR,
     "optimized",
@@ -62,19 +48,30 @@ model_path = os.path.join(
 if not os.path.exists(model_path):
     model_path = os.path.join(
         PROJECT_DIR,
+        args["project_results_name"],
         "train",
         "weights",
         "best.pt",
     )
+    resume = True
 model = YOLO(model_path, task="detect", verbose=True)
 
 
-# Predict
-generate_predicted_images(
-    model,
-    images_dir=TESTING_IMG_DIR,
-    labels_dir=TESTING_LABEL_DIR,
-    project_dir=VISUALIZE_DIR,
-    output_dir=OUTPUT_DIR,
-    num_images=20,
-)
+# Train
+try:
+    results = model.train(
+        data=DATA_DIR,
+        project=os.path.join(PROJECT_DIR, "optimized"),
+        epochs=50,
+        imgsz=IMG_SIZE[0],
+        batch=8,
+        exist_ok=True,
+        resume=resume,
+        device=-1,
+        patience=10,
+        optimizer="AdamW",
+        plots=True,
+        amp=False,
+    )
+except Exception as e:
+    print(f"Last training was finished: {e}.")

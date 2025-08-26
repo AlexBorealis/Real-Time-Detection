@@ -55,9 +55,9 @@ def fps(sess: InferenceSession, image_path: str):
         start = time.time()
         _ = sess.run(None, {input_name: real_input})
         times.append(time.time() - start)
-    avg_time = np.mean(times)
 
     return {
-        "fps": 1 / avg_time,  # type: ignore
+        "fps": np.mean(times) ** (-1),
         "real_input": real_input,
+        "times": times,
     }

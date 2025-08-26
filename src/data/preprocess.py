@@ -21,13 +21,7 @@ start = time.time()
 PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
 IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
-# Creation Directories
-for split in ["train", "test", "val"]:
-    os.makedirs(os.path.join(PROCESSED_DIR, "images", split), exist_ok=True)
-    os.makedirs(os.path.join(PROCESSED_DIR, "labels", split), exist_ok=True)
-
 # Augmentation Pipelines
-# noinspection PyTypeChecker
 transform = ReplayCompose(
     [
         Resize(height=IMG_SIZE[0], width=IMG_SIZE[1]),
@@ -40,10 +34,12 @@ transform = ReplayCompose(
 for split in ["train", "test", "val"]:
     images_dir = os.path.join(os.getenv("RAW_IMAGES_DIR"), split)
     labels_dir = os.path.join(os.getenv("RAW_LABELS_DIR"), split)
+
+    os.makedirs(os.path.join(PROCESSED_DIR, "images", split), exist_ok=True)
+    os.makedirs(os.path.join(PROCESSED_DIR, "labels", split), exist_ok=True)
     processed_images_dir = os.path.join(PROCESSED_DIR, "images", split)
     processed_labels_dir = os.path.join(PROCESSED_DIR, "labels", split)
 
-    # noinspection PyRedeclaration
     selected_img_files = os.listdir(images_dir)
 
     batch_size_processing = 10000

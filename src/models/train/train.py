@@ -30,14 +30,14 @@ with open(yaml_path, "r") as file:
 
 
 # Set directories path for training
-PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
-PROJECT_DIR = os.path.join(
-    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
-)
 DATA_DIR = os.path.join(
     os.getenv("HOME_DIR"), "config", "datasets", dataset_yaml
 )  # Default dataset_name.yaml or personal_dataset_name.yaml
 IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
+PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
+PROJECT_DIR = os.path.join(
+    os.getenv("HOME_DIR"), "results", "models", args["project_results_name"]
+)
 
 
 # Modify labels from .json to .txt
