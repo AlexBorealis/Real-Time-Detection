@@ -7,7 +7,6 @@ import yaml
 from dotenv import load_dotenv
 from ultralytics import YOLO
 
-from src.models.transform_model.transform_model import model_path
 from src.utils.utils import convert_labels
 
 # Parse arguments

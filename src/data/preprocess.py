@@ -1,3 +1,4 @@
+import argparse
 import gc
 import os
 import time
@@ -8,17 +9,37 @@ from albumentations import (
     ReplayCompose,
     Resize,
 )
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 from tqdm import tqdm
 
 from src.utils.augmentations import process_image
 
+# Parse arguments
+parser = argparse.ArgumentParser(
+    description="Run preprocessing data"
+)
+parser.add_argument(
+    "--height",
+    type=str,
+    default="480",
+    help="Height image: default 480",
+)
+parser.add_argument(
+    "--width",
+    type=str,
+    default="480",
+    help="Width image: default 480",
+)
+parse_args = parser.parse_args()
 load_dotenv()
 
 start = time.time()
 
 # Paths
 PROCESSED_DIR = os.path.join(os.getenv("HOME_DIR"), "data", "processed")
+ENV_PATH = os.path.join(os.getenv("HOME_DIR"), ".env")
+set_key(ENV_PATH, "HEIGHT", parse_args.height)
+set_key(ENV_PATH, "WIDTH", parse_args.width)
 IMG_SIZE = int(os.getenv("HEIGHT")), int(os.getenv("WIDTH"))
 
 # Augmentation Pipelines
