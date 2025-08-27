@@ -9,7 +9,7 @@ from ultralytics import YOLO
 
 # Parse arguments
 parser = argparse.ArgumentParser(
-    description="Transform YOLO model to special format"
+    description="Quantization model"
 )
 parser.add_argument(
     "--model",
@@ -27,12 +27,6 @@ parser.add_argument(
     type=str,
     default="yolo8_baseline.yaml",
     help="Config model choice (default: yolo8_baseline.yaml)",
-)
-parser.add_argument(
-    "--format",
-    type=str,
-    default="torchscript",
-    help="Model format: onnx, torchscript, engine (default: torchscript)",
 )
 parse_args = parser.parse_args()
 load_dotenv()

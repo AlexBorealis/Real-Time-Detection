@@ -12,7 +12,7 @@ from ultralytics import YOLO
 
 # Parse arguments
 parser = argparse.ArgumentParser(
-    description="Transform YOLO model to special format"
+    description="Pruning model"
 )
 parser.add_argument(
     "--model",
@@ -32,10 +32,10 @@ parser.add_argument(
     help="Config model choice (default: yolo8_baseline.yaml)",
 )
 parser.add_argument(
-    "--format",
-    type=str,
-    default="torchscript",
-    help="Model format: onnx, torchscript, engine (default: torchscript)",
+    "--ratio",
+    type=float,
+    default=0.1,
+    help="Ratio pruning weights (default: 0.1)",
 )
 parse_args = parser.parse_args()
 load_dotenv()
@@ -97,7 +97,7 @@ model = YOLO(model_path, task="detect", verbose=True)
 try:
     for name, module in model.model.named_modules():
         if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
-            prune.l1_unstructured(module, name="weight", amount=parse_args.prune_amount)
+            prune.l1_unstructured(module, name="weight", amount=parse_args.ratio)
             prune.remove(module, "weight")
 
 
