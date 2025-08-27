@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import torch
@@ -6,10 +7,40 @@ from dotenv import load_dotenv
 from torch.quantization import quantize_dynamic
 from ultralytics import YOLO
 
+# Parse arguments
+parser = argparse.ArgumentParser(
+    description="Transform YOLO model to special format"
+)
+parser.add_argument(
+    "--model",
+    type=str,
+    default="1",
+    help="""
+    Model choice: 
+    1 for trained model, 
+    2 for optimized model, 
+    'path/to/model.pt' for custom path
+    """,
+)
+parser.add_argument(
+    "--config",
+    type=str,
+    default="yolo8_baseline.yaml",
+    help="Config model choice (default: yolo8_baseline.yaml)",
+)
+parser.add_argument(
+    "--format",
+    type=str,
+    default="torchscript",
+    help="Model format: onnx, torchscript, engine (default: torchscript)",
+)
+parse_args = parser.parse_args()
 load_dotenv()
+
 
 # Set directory
 os.chdir(os.getenv("HOME_DIR"))
+
 
 # Set model.yaml path
 # Create your yaml config file model
@@ -17,12 +48,11 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
-handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
 yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
     "models",
-    handle_model_yaml,
+    parse_args.config,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
@@ -38,13 +68,23 @@ OUTPUT_DIR = os.path.join(
 )  # Result directory
 
 
+# Select model based on choice
+if parse_args.model == "1":
+    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+elif parse_args.model == "2":
+    model_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.pt")
+elif parse_args.model not in ["1", "2"]:
+    model_path = parse_args.model
+else:
+    raise ValueError(
+        "Invalid model choice."
+    )
+
+if not os.path.exists(model_path):
+    raise FileNotFoundError(f"Model not found at {model_path}")
+
+
 # Load model
-model_path = os.path.join(
-    PROJECT_DIR,
-    "train",
-    "weights",
-    "best.pt",
-)
 model = YOLO(model_path, task="detect", verbose=True)
 
 
@@ -67,3 +107,12 @@ torch.save(
         "best_optimized.pt",
     ),
 )
+
+# Saving model with metadata
+yolo_model = YOLO(model_path, task="detect", verbose=True)  # Use original YAML config
+yolo_model.model.load_state_dict(model.state_dict())  # Load quantized weights
+
+# Save quantized model with metadata
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+quantized_path = os.path.join(OUTPUT_DIR, "best_optimized.pt")
+yolo_model.save(quantized_path)  # Save with YOLO metadata

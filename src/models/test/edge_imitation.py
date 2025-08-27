@@ -1,3 +1,4 @@
+import argparse
 import os
 import random
 
@@ -9,10 +10,41 @@ from ultralytics import YOLO
 
 from src.utils.metrics import fps
 
+# Parse arguments
+parser = argparse.ArgumentParser(
+    description="Run imitation YOLO model on the edge device"
+)
+parser.add_argument(
+    "--model",
+    type=str,
+    default="1",
+    help="""
+    Model choice: 
+    1 for init model (default value), 
+    2 for trained model, 
+    3 for optimized model, 
+    'path/to/model.pt' for custom path
+    """,
+)
+parser.add_argument(
+    "--format",
+    type=str,
+    default="onnx",
+    help="Model format: onnx, torchscript, engine (default: torchscript)",
+)
+parser.add_argument(
+    "--config",
+    type=str,
+    default="yolo8_baseline.yaml",
+    help="Config model choice (default: yolo8_baseline.yaml)",
+)
+parse_args = parser.parse_args()
 load_dotenv()
+
 
 # Set directory
 os.chdir(os.getenv("HOME_DIR"))
+
 
 # Set model.yaml path
 # Create your yaml config file model
@@ -20,13 +52,12 @@ os.chdir(os.getenv("HOME_DIR"))
 # project_results_name: example_project
 # optimized_project_results_name: example_project_optimized
 # selected_classes: [class0, class1, class2, ..., classN]
-handle_model_yaml = "yolo8_baseline.yaml"  # handle_model.yaml
 dataset_yaml = "bdd100k.yaml"
 yaml_path = os.path.join(
     os.getenv("HOME_DIR"),
     "config",
     "models",
-    handle_model_yaml,
+    parse_args.config,
 )
 with open(yaml_path, "r") as file:
     args = yaml.safe_load(file)
@@ -45,30 +76,36 @@ TESTING_IMG_DIR = os.path.join(
 )  # Testing images directory
 
 
-# Load models
-onnx_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.onnx")
-best_model_path = os.path.join(
-    PROJECT_DIR,
-    "optimized",
-    "best_optimized.pt",
-)
-if not os.path.exists(best_model_path) and not os.path.exists(onnx_path):
-    onnx_path = os.path.join(PROJECT_DIR, "train", "weights", "best.onnx")
-    best_model_path = os.path.join(
-        PROJECT_DIR,
-        "train",
-        "weights",
-        "best.pt",
+# Select model based on choice
+if parse_args.model == "1":
+    transform_model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.onnx")
+    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+elif parse_args.model == "2":
+    transform_model_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.onnx")
+    model_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.pt")
+elif parse_args.model not in ["1", "2"]:
+    transform_model_path = parse_args.format
+    model_path = parse_args.model
+else:
+    raise ValueError(
+        "Invalid model choice. Use 1 for base model or 2 for optimized model."
     )
-best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
+
+if not os.path.exists(model_path):
+    raise FileNotFoundError(f"Model not found at {model_path}")
+
+
+# Load model
+best_model = YOLO(model_path, task="detect", verbose=True).to(torch.device("cpu"))
+
 
 # Measure model size
-model_size = os.path.getsize(onnx_path) / (1024 * 1024)
+model_size = os.path.getsize(transform_model_path) / (1024 * 1024)
 print(f"Model size: {model_size:.2f} MB")
 
 
 # Load ONNX model on CPU
-sess = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
+sess = ort.InferenceSession(transform_model_path, providers=["CPUExecutionProvider"])
 image_path = os.path.join(
     TESTING_IMG_DIR,
     os.listdir(TESTING_IMG_DIR)[random.randint(0, len(os.listdir(TESTING_IMG_DIR)))],
