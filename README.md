@@ -1,9 +1,24 @@
 # Real-Time-Detection
 
+# Результаты и прогнозы
+Результаты обучения моделей ```/Real-Time-Detection/results/models```
+
+Визуализации прогнозов модели с вероятностями детекции - ```/Real-Time-Detection/results/visualizations/model_name/predict```
+
+Визуализации прогнозов модели в сравнении с реальными рамками - ```/Real-Time-Detection/results/visualizations/model_name/comparison```
+
+Предсказания на видео ```/Real-Time-Detection/results/visualizations/model_name/videos```
+
+# Ноутбуки
+Ноутбуки (.ipynb) с визуализациями и метриками - ```/Real-Time-Detection/notebooks/model_name```
+
+# Данные
 [BDD100K](http://bdd-data.berkeley.edu/download.html)
 
 1) Изображения для тренировки, валидации и тестирования моделей; скачивается вручную, по верхней ссылке и там выбираются эти объекты - 100k images, Labels
 2) Видео для тестирования; также скачиваются вручную - BDD-Attention button
+файл конфигурации датасета - ```/Real-Time-Detection/config/datasets/dataset.yaml```
+файлы с первоначальными конфигурациями ```/Real-Time-Detection/config/models/config.yaml```
 
 
 # Запуск скриптов
