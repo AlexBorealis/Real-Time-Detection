@@ -2,7 +2,7 @@ task: detect
 mode: train
 model: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized/best_optimized.pt
 data: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/config/datasets/bdd100k.yaml
-epochs: 50
+epochs: 100
 time: null
 patience: 10
 batch: 8
