@@ -37,7 +37,7 @@
    pipenv run python -m src.models.train.train
    ```
 
-3) Запуск создания предсказаний (predict_image.py/predict_image_video.py) - 
+3) Запуск создания предсказаний (predict_image.py/predict_video.py) - 
     ```
    cd /project/path
    pipenv run python -m src.models.test.predict_video --model 1 --config yolo8_baseline.yaml #(base model)
