@@ -3,11 +3,113 @@ import os
 import random
 
 import cv2
+import numpy as np
 import torch
+from scipy.optimize import linear_sum_assignment, minimize
+from scipy.spatial.distance import cdist
+from torch import cosine_similarity
+from torchvision.ops import nms
 from tqdm import tqdm
 
 
-def load_image(img_path: str, rgb: bool = True):
+def postprocess_detections(
+    detections: np.ndarray, iou: float = 0.5, ratio_median: float = 1.0
+) -> np.ndarray:
+    if len(detections) == 0:
+        return detections
+
+    areas = (detections[:, 2] - detections[:, 0]) * (
+        detections[:, 3] - detections[:, 1]
+    )
+    median_area = np.median(areas)
+    min_area = median_area * ratio_median  # type: ignore
+    detections = detections[areas > min_area]
+
+    if len(detections) == 0:
+        return detections
+
+    # NMS
+    boxes = torch.tensor(detections[:, :4], dtype=torch.float32)
+    scores = torch.tensor(detections[:, 4], dtype=torch.float32)
+    keep_indices = nms(boxes, scores, iou)
+    return detections[keep_indices.numpy()]
+
+
+def to_centers(boxes: np.ndarray) -> np.ndarray:
+    x1, y1, x2, y2, score = boxes.T
+    xc = (x1 + x2) / 2
+    yc = (y1 + y2) / 2
+    w = x2 - x1
+    h = y2 - y1
+    return np.column_stack([xc, yc, w, h, score])
+
+
+def similarity(tensor1: torch.Tensor, tensor2: torch.Tensor, params: tuple) -> float:
+    iou, ratio = params
+    detections1 = tensor1[:, :5].detach().clone().cpu().numpy()
+    detections2 = tensor2[:, :5].detach().clone().cpu().numpy()
+    processed = postprocess_detections(detections2, iou, ratio)
+
+    if len(processed) == 0 or len(tensor1) == 0:
+        return -1.0
+
+    centers1 = to_centers(detections1)
+    centers2 = to_centers(processed)
+
+    dist = cdist(centers1[:, :2], centers2[:, :2])
+    row_ind, col_ind = linear_sum_assignment(dist)
+
+    matched1 = torch.from_numpy(centers1[row_ind]).float()
+    matched2 = torch.from_numpy(centers2[col_ind]).float()
+
+    if matched1.ndim == 1:
+        matched1 = matched1.unsqueeze(0)
+        matched2 = matched2.unsqueeze(0)
+
+    sims = cosine_similarity(matched1, matched2)
+    sims = sims.diagonal() if sims.ndim > 1 else sims
+    return -float(torch.mean(sims))
+
+
+def tune_parameters(
+    tensor1: torch.Tensor,
+    tensor2: torch.Tensor,
+    initial: tuple[float, float] = (0.5, 1.0),
+    iou_bounds: tuple[float, float] = (0.1, 0.9),
+    ratio_bounds: tuple[float, float] = (0.1, 2.0),
+) -> dict:
+    """
+    Подбирает оптимальные iou и ratio_median для максимального косинусного сходства
+    между tensor1 и обработанным tensor2.
+
+    Args:
+        tensor1: torch.Tensor [N, 6] - детекции базовой модели
+        tensor2: torch.Tensor [M, 6] - детекции оптимизированной модели
+        iou_bounds: tuple - границы для iou
+        ratio_bounds: tuple - границы для ratio_median
+
+    Returns:
+        dict: {'iou': opt_iou, 'ratio_median': opt_ratio, 'similarity': max_sim}
+        :type initial: tuple[float, float]
+    """
+
+    def sim_wrapper(params: tuple) -> float:
+        return similarity(tensor1, tensor2, params)
+
+    res = minimize(
+        sim_wrapper, initial, bounds=[iou_bounds, ratio_bounds], method="L-BFGS-B"
+    )
+
+    opt_iou, opt_ratio = res.x
+    max_sim = -res.fun
+    return {
+        "iou": float(opt_iou),
+        "ratio_median": float(opt_ratio),
+        "similarity": float(max_sim),
+    }
+
+
+def load_image(img_path: str, rgb: bool = True) -> np.ndarray:
     if rgb:
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -100,8 +202,12 @@ def generate_predicted_images(
 
         # Draw predicted boxes (red, thin, no labels)
         for result in results:
-            for box in result.boxes:
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
+            detections = result.boxes.data.cpu().numpy() # [x1, y1, x2, y2, score]
+            filtered_detections = postprocess_detections(detections, iou=iou)
+
+            # Draw predicted boxes (red, thin, no labels)
+            for i, det in enumerate(filtered_detections):
+                x1, y1, x2, y2, _, _ = map(int, det)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)  # Thin red box
                 cv2.putText(
                     img,
@@ -149,7 +255,8 @@ def generate_predicted_video(
     video_dir: str,
     video_name: str,
     output_dir: str,
-    conf: float = 0.25,
+    iou: float = 0.1,
+    ratio_median: float = 0.5,
 ):
     os.makedirs(output_dir, exist_ok=True)
 
@@ -172,22 +279,30 @@ def generate_predicted_video(
     while ret:
         results = model(frame)[0]
 
-        for result in results.boxes.data.tolist():
-            x1, y1, x2, y2, score, class_id = result
-            if score > conf:
-                cv2.rectangle(
-                    frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4
-                )
-                cv2.putText(
-                    frame,
-                    results.names[int(class_id)].upper(),
-                    (int(x1), int(y1 - 10)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1.3,
-                    (0, 255, 0),
-                    3,
-                    cv2.LINE_AA,
-                )
+        boxes_data = (
+            results.boxes.data.cpu().numpy()
+        )  # [x1, y1, x2, y2, score, class_id]
+        filtered_detections = postprocess_detections(
+            boxes_data, iou=iou, ratio_median=ratio_median
+        )
+
+        # Draw predicted boxes
+        for i, det in enumerate(filtered_detections):
+            x1, y1, x2, y2, _, class_id = map(int, det)
+            class_name = (
+                results.names[class_id] if len(filtered_detections) > i else "predict"
+            )
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 4)
+            cv2.putText(
+                frame,
+                class_name.upper(),
+                (x1, y1 - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.3,
+                (0, 255, 0),
+                3,
+                cv2.LINE_AA,
+            )
 
         out.write(frame)
         ret, frame = cap.read()
