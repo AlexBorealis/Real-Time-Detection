@@ -43,6 +43,12 @@ parser.add_argument(
     default="bdd100k.yaml",
     help="Dataset choice: default bdd100k.yaml",
 )
+parser.add_argument(
+    "--epochs",
+    type=str,
+    default="100",
+    help="Count of epochs: default 100",
+)
 parse_args = parser.parse_args()
 load_dotenv()
 
@@ -115,15 +121,26 @@ try:
     results = model.train(
         data=DATA_DIR,
         project=PROJECT_DIR,
-        epochs=100,
+        epochs=int(parse_args.epochs),
         imgsz=IMG_SIZE[0],
         batch=8,
-        exist_ok=True,
         resume=parse_args.resume,
         device=-1,
         patience=10,
         optimizer="AdamW",
         plots=True,
+        hsv_h=0.015,  # HSV augmentation for variative lightness/contrast
+        hsv_s=0.7,
+        hsv_v=0.4,
+        degrees=0.0,  # Without rotation
+        translate=0.1,
+        scale=0.5,
+        shear=0.0,
+        perspective=0.0,  # Perspective for distortions
+        flipud=0.0,
+        fliplr=0.5,
+        mosaic=1.0,  # Mosaic
+        mixup=0.0,
         amp=False,
     )
 except Exception as e:

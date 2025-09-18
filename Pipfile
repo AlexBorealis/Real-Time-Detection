@@ -90,6 +90,7 @@ ultralytics = "==8.3.182"
 ultralytics-thop = "==2.0.15"
 urllib3 = "==2.5.0"
 torchinfo = "*"
+supervision = "*"
 
 [dev-packages]
 ruff = "==0.12.9"
