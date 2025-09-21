@@ -20,9 +20,9 @@ parser.add_argument(
     default="1",
     help="""
     Model choice: 
-    1 for init model (default value), 
-    2 for trained model, 
-    3 for optimized model, 
+    1 for trained model yolo8 (default value), 
+    2 for trained model yolo8 optimized, 
+    3 for trained model yolo11, 
     'path/to/model.pt' for custom path
     """,
 )
@@ -31,6 +31,18 @@ parser.add_argument(
     type=str,
     default="yolo8_baseline.yaml",
     help="Config model choice (default: yolo8_baseline.yaml)",
+)
+parser.add_argument(
+    "--iou",
+    type=str,
+    default="0.25",
+    help="IOU metric model choice (default: 0.25)",
+)
+parser.add_argument(
+    "--conf",
+    type=str,
+    default="0.25",
+    help="Confidence metric model choice (default: 0.25)",
 )
 parse_args = parser.parse_args()
 load_dotenv()
@@ -74,26 +86,30 @@ TESTING_LABEL_DIR = os.path.join(
 VISUALIZE_DIR = os.path.join(
     os.getenv("HOME_DIR"),
     "results",
-    "visualizations",
+    "visualizations"
 )  # Directory for visualizations
 
 
 # Select model based on choice
 if parse_args.model == "1":
     model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, args["project_results_name"], "comparison")
     VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, args["project_results_name"])
-    OUTPUT_DIR = os.path.join(VISUALIZE_DIR, args["project_results_name"], "comparison")
 elif parse_args.model == "2":
     model_path = os.path.join(PROJECT_DIR, "optimized", "train3", "weights", "best.pt")
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, "yolo8_baseline_optimized", "comparison")
     VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, "yolo8_baseline_optimized")
-    OUTPUT_DIR = os.path.join(VISUALIZE_DIR, "yolo8_baseline_optimized", "comparison")
-elif parse_args.model not in ["1", "2"]:
+elif parse_args.model == "3":
+    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, args["project_results_name"], "comparison")
+    VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, args["project_results_name"])
+elif parse_args.model not in ["1", "2", "3"]:
     model_path = parse_args.model
-    VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, "custom_model")
     OUTPUT_DIR = os.path.join(OUTPUT_DIR, "custom_model", "comparison")
+    VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, "custom_model")
 else:
     raise ValueError(
-        "Invalid model choice. Use 1 for base model or 2 for optimized model."
+        "Invalid model choice."
     )
 
 if not os.path.exists(model_path):
@@ -112,4 +128,6 @@ generate_predicted_images(
     project_dir=VISUALIZE_DIR,
     output_dir=OUTPUT_DIR,
     num_images=parse_args.nimage,
+    iou=float(parse_args.iou),
+    conf=float(parse_args.conf)
 )

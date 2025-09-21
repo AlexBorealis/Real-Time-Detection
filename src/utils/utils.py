@@ -203,10 +203,9 @@ def generate_predicted_images(
         # Draw predicted boxes (red, thin, no labels)
         for result in results:
             detections = result.boxes.data.cpu().numpy() # [x1, y1, x2, y2, score]
-            filtered_detections = postprocess_detections(detections, iou=iou)
 
             # Draw predicted boxes (red, thin, no labels)
-            for i, det in enumerate(filtered_detections):
+            for i, det in enumerate(detections):
                 x1, y1, x2, y2, _, _ = map(int, det)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 1)  # Thin red box
                 cv2.putText(
