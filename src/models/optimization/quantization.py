@@ -104,7 +104,7 @@ torch.save(
 
 # Saving model with metadata
 yolo_model = YOLO(model_path, task="detect", verbose=True)  # Use original YAML config
-yolo_model.model.load_state_dict(model.state_dict())  # Load quantized weights
+yolo_model.load_state_dict(model.state_dict())  # Load quantized weights
 
 # Save quantized model with metadata
 os.makedirs(OUTPUT_DIR, exist_ok=True)

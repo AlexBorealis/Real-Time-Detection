@@ -76,7 +76,7 @@ if parse_args.model == "1":
     model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
     OUTPUT_DIR = os.path.join(OUTPUT_DIR, args["project_results_name"], "videos")
 elif parse_args.model == "2":
-    model_path = os.path.join(PROJECT_DIR, "optimized", "train", "weights", "best.pt")
+    model_path = os.path.join(PROJECT_DIR, "optimized", "train3", "weights", "best.pt")
     OUTPUT_DIR = os.path.join(OUTPUT_DIR, "yolo8_baseline_optimized", "videos")
 elif parse_args.model not in ["1", "2"]:
     model_path = parse_args.model

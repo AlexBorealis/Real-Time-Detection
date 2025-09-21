@@ -79,24 +79,29 @@ TESTING_IMG_DIR = os.path.join(
 # Select model based on choice
 if parse_args.model == "1":
     transform_model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.onnx")
-    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+    best_model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
 elif parse_args.model == "2":
-    transform_model_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.onnx")
-    model_path = os.path.join(PROJECT_DIR, "optimized", "best_optimized.pt")
+    transform_model_path = os.path.join(
+        PROJECT_DIR, "optimized", "train3", "weights", "best.onnx"
+    )
+    best_model_path = os.path.join(
+        PROJECT_DIR, "optimized", "train3", "weights", "best.pt"
+    )
 elif parse_args.model not in ["1", "2"]:
     transform_model_path = parse_args.format
-    model_path = parse_args.model
+    best_model_path = parse_args.model
 else:
     raise ValueError(
         "Invalid model choice. Use 1 for base model or 2 for optimized model."
     )
 
-if not os.path.exists(model_path):
-    raise FileNotFoundError(f"Model not found at {model_path}")
+if not os.path.exists(best_model_path):
+    raise FileNotFoundError(f"Model not found at {best_model_path}")
 
 
 # Load model
-best_model = YOLO(model_path, task="detect", verbose=True).to(torch.device("cpu"))
+best_model = YOLO(best_model_path, task="detect", verbose=True).to(torch.device("cpu"))
+best_model.export(format="onnx", imgsz=IMG_SIZE[0], dynamic=False, half=True)
 
 
 # Measure model size
