@@ -1,30 +1,78 @@
 # Real-Time-Detection
 
-# Результаты и прогнозы
-Результаты обучения моделей ```/Real-Time-Detection/results/models```
+## Результаты и прогнозы
+Результаты обучения моделей `/Real-Time-Detection/results/models`
 
-Визуализации прогнозов модели с вероятностями детекции - ```/Real-Time-Detection/results/visualizations/model_name/predict```
+Визуализации прогнозов модели с вероятностями детекции - `/Real-Time-Detection/results/visualizations/model_name/predict`
 
-Визуализации прогнозов модели в сравнении с реальными рамками - ```/Real-Time-Detection/results/visualizations/model_name/comparison```
+Визуализации прогнозов модели в сравнении с реальными рамками - `/Real-Time-Detection/results/visualizations/model_name/comparison`
 
-Предсказания на видео ```/Real-Time-Detection/results/visualizations/model_name/videos```
+Предсказания на видео `/Real-Time-Detection/results/visualizations/model_name/videos`
 
-# Ноутбуки
-Ноутбуки (.ipynb) с визуализациями и метриками - ```/Real-Time-Detection/notebooks/model_name```
+## Методики проведения экспериментов
 
-# Данные
+### Цель экспериментов
+Оценка производительности моделей YOLOv8 для задач детекции объектов в реальном времени на датасете BDD100K, включая базовую модель, оптимизированные версии (обрезка, квантизация) и тестирование на edge-устройствах.
+
+### Этапы экспериментов
+- **Подготовка данных**: Использование датасета BDD100K. Скачивание изображений (100k images, Labels) и видео (BDD-Attention). Разделение на тренировочную, валидационную и тестовую выборки согласно конфигурации `/Real-Time-Detection/config/datasets/dataset.yaml`.
+- **Предобработка**: Запуск скрипта `preprocess.py` для аугментации, нормализации и подготовки данных. Команда: `pipenv run python -m src.data.preprocess`.
+- **Обучение моделей**: Основной цикл обучения через `train.py`. Параметры: эпохи, learning rate, batch size из `/Real-Time-Detection/config/models/config.yaml`. Команда: `pipenv run python -m src.models.train.train`.
+- **Оптимизация**: 
+  - Обрезка модели (`pruning.py`) с параметром `prune-amount` (например, 0.05). Команда: `pipenv run python -m src.models.optimization.pruning --model 1 --prune-amount 0.05 --config yolo8_baseline.yaml`.
+  - Квантизация модели (`quantization.py`). Команда: `pipenv run python -m src.models.optimization.quantization --model 1 --config yolo8_baseline.yaml`.
+- **Тестирование**: 
+  - Предсказания на изображениях и видео через `predict_image.py` и `predict_video.py`. Метрики: mAP, precision, recall, FPS, IoU. Примеры команд: `pipenv run python -m src.models.test.predict_video --model 1 --config yolo8_baseline.yaml`.
+- **Имитация на edge-устройствах**: Тестирование преобразованной модели (например, в ONNX) через `edge_imitation.py`. Команда: `pipenv run python -m src.models.test.edge_imitation --model 1 --format onnx --config yolo8_baseline.yaml`.
+
+### Конфигурации
+Основная конфигурация: `yolo8_baseline.yaml`. Влияет на гиперпараметры обучения, оптимизации и тестирования. Преобразование модели в форматы (например, ONNX) через `transform_model.py`.
+
+### Оборудование
+Эксперименты проводились на GPU/CPU (рекомендуется NVIDIA GPU с CUDA). Укажите объем памяти (например, 16GB RAM, 8GB VRAM).
+
+## Обзор результатов
+
+### Метрики производительности
+Сравнение базовой (model 1), оптимизированной (model 2) моделей YOLOv8 и (model 3) YOLO11. Метрики включают mAP@0.5, precision, recall, FPS на изображениях/видео.
+
+### Сравнение моделей
+| Модель                  | mAP@0.5 | Precision | Recall | F1   |
+|-------------------------|---------|-----------|--------|------|
+| Базовая (YOLOv8)        | 0.390   | 0.663     | 0.362  | 0.41 |
+| Обрезанная (prune 0.05) | 0.399   | 0.689     | 0.361  | 0.42 |
+| YOLOv11                 | 0.383   | 0.657     | 0.35   | 0.4  |
+
+(Актуальные значения в ноутбуках `/notebooks/model_name`.)
+
+Влияние оптимизации: снижение точности на 3-5%, рост скорости на 20-50%.
+
+### Визуализации
+- `/results/visualizations/model_name/predict`: Детекции с вероятностями (bounding boxes и scores).
+- `/results/visualizations/model_name/comparison`: Сравнение предсказанных и ground truth рамок (IoU визуализация).
+- `/results/visualizations/model_name/videos`: Обработанные видео с детекциями.
+
+### Ноутбуки
+Ноутбуки (.ipynb) с визуализациями и метриками - `/Real-Time-Detection/notebooks/model_name`. Содержат графики обучения (loss curves), confusion matrices и расчеты метрик.
+
+### Выводы
+
+
+## Ноутбуки
+Ноутбуки (.ipynb) с визуализациями и метриками - `/Real-Time-Detection/notebooks/model_name`
+
+## Данные
 [BDD100K](http://bdd-data.berkeley.edu/download.html)
 
 1) Изображения для тренировки, валидации и тестирования моделей; скачивается вручную, по верхней ссылке и там выбираются эти объекты - 100k images, Labels
 2) Видео для тестирования; также скачиваются вручную - BDD-Attention button
 
-файл конфигурации датасета - ```/Real-Time-Detection/config/datasets/dataset.yaml```
+файл конфигурации датасета - `/Real-Time-Detection/config/datasets/dataset.yaml`
 
-файлы с первоначальными конфигурациями ```/Real-Time-Detection/config/models/config.yaml```
+файлы с первоначальными конфигурациями `/Real-Time-Detection/config/models/config.yaml`
 
-
-# Запуск скриптов
-## Для запуска справки по командам ```pipenv run python -m command --help```
+## Запуск скриптов
+## Для запуска справки по командам `pipenv run python -m command --help`
 1) Запуск пред обработки данных (preprocess.py) -
     ```
    cd /project/path
