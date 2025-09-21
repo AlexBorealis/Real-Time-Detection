@@ -18,9 +18,9 @@ parser.add_argument(
     default="1",
     help="""
     Model choice: 
-    1 for init model (default value), 
-    2 for trained model, 
-    3 for optimized model, 
+    1 for trained model yolo8 (default value), 
+    2 for trained model yolo8 optimized, 
+    3 for trained model yolo11, 
     'path/to/model.pt' for custom path
     """,
 )
@@ -29,6 +29,18 @@ parser.add_argument(
     type=str,
     default="yolo8_baseline.yaml",
     help="Config model choice (default: yolo8_baseline.yaml)",
+)
+parser.add_argument(
+    "--iou",
+    type=str,
+    default="0.25",
+    help="IOU metric model choice (default: 0.25)",
+)
+parser.add_argument(
+    "--conf",
+    type=str,
+    default="0.25",
+    help="Confidence metric model choice (default: 0.25)",
 )
 parse_args = parser.parse_args()
 load_dotenv()
@@ -78,7 +90,10 @@ if parse_args.model == "1":
 elif parse_args.model == "2":
     model_path = os.path.join(PROJECT_DIR, "optimized", "train3", "weights", "best.pt")
     OUTPUT_DIR = os.path.join(OUTPUT_DIR, "yolo8_baseline_optimized", "videos")
-elif parse_args.model not in ["1", "2"]:
+elif parse_args.model == "3":
+    model_path = os.path.join(PROJECT_DIR, "train", "weights", "best.pt")
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, args["project_results_name"], "videos")
+elif parse_args.model not in ["1", "2", "3"]:
     model_path = parse_args.model
     OUTPUT_DIR = os.path.join(OUTPUT_DIR, "custom_model", "videos")
 else:
@@ -100,4 +115,6 @@ generate_predicted_video(
     video_dir=TESTING_VIDEO_DIR,
     output_dir=OUTPUT_DIR,
     video_name=VIDEO_NAME,
+    iou=float(parse_args.iou),
+    conf=float(parse_args.conf)
 )

@@ -84,7 +84,7 @@ if parse_args.model == "1":
     VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, args["project_results_name"])
     OUTPUT_DIR = os.path.join(VISUALIZE_DIR, args["project_results_name"], "comparison")
 elif parse_args.model == "2":
-    model_path = os.path.join(PROJECT_DIR, "optimized", "train", "weights", "best.pt")
+    model_path = os.path.join(PROJECT_DIR, "optimized", "train3", "weights", "best.pt")
     VISUALIZE_DIR = os.path.join(VISUALIZE_DIR, "yolo8_baseline_optimized")
     OUTPUT_DIR = os.path.join(VISUALIZE_DIR, "yolo8_baseline_optimized", "comparison")
 elif parse_args.model not in ["1", "2"]:

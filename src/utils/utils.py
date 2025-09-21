@@ -170,7 +170,7 @@ def generate_predicted_images(
     project_dir: str,
     num_images: int = 5,
     conf: float = 0.25,
-    iou: float = 0.5,
+    iou: float = 0.25,
 ):
     os.makedirs(output_dir, exist_ok=True)
 
@@ -255,8 +255,8 @@ def generate_predicted_video(
     video_dir: str,
     video_name: str,
     output_dir: str,
-    iou: float = 0.1,
-    ratio_median: float = 0.5,
+    iou: float = 0.25,
+    conf: float = 0.25,
 ):
     os.makedirs(output_dir, exist_ok=True)
 
@@ -271,40 +271,20 @@ def generate_predicted_video(
     h, w, _ = frame.shape
     out = cv2.VideoWriter(
         video_path_out,
-        cv2.VideoWriter_fourcc(*"MP4V"),  # type: ignore
+        cv2.VideoWriter_fourcc(*"MP4V"), #type: ignore
         int(cap.get(cv2.CAP_PROP_FPS)),
         (w, h),
     )
-
     while ret:
-        results = model(frame)[0]
-
-        boxes_data = (
-            results.boxes.data.cpu().numpy()
-        )  # [x1, y1, x2, y2, score, class_id]
-        filtered_detections = postprocess_detections(
-            boxes_data, iou=iou, ratio_median=ratio_median
+        results = model.predict(
+            source=frame,
+            conf=conf,
+            iou=iou,
+            save=False,
+            save_txt=False,
         )
-
-        # Draw predicted boxes
-        for i, det in enumerate(filtered_detections):
-            x1, y1, x2, y2, _, class_id = map(int, det)
-            class_name = (
-                results.names[class_id] if len(filtered_detections) > i else "predict"
-            )
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 4)
-            cv2.putText(
-                frame,
-                class_name.upper(),
-                (x1, y1 - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.3,
-                (0, 255, 0),
-                3,
-                cv2.LINE_AA,
-            )
-
-        out.write(frame)
+        processed_frame = results[0].plot()  # Get frame with drawn predictions
+        out.write(processed_frame)
         ret, frame = cap.read()
 
     cap.release()
