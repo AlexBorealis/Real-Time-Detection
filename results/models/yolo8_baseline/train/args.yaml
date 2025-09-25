@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/train/weights/best.pt
-data: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/config/datasets/bdd100k.yaml
+model: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/train/weights/best.pt
+data: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/config/datasets/bdd100k.yaml
 epochs: 100
 time: null
 patience: 10
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: '0'
 workers: 8
-project: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline
+project: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline
 name: train
 exist_ok: true
 pretrained: true
@@ -24,7 +24,7 @@ single_cls: false
 rect: false
 cos_lr: false
 close_mosaic: 10
-resume: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/train/weights/best.pt
+resume: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/train/weights/best.pt
 amp: false
 fraction: 1.0
 profile: false
