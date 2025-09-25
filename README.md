@@ -1,13 +1,13 @@
 # Real-Time-Detection
 
 ## Результаты и прогнозы
-Результаты обучения моделей `/Real-Time-Detection/results/models`
+Результаты обучения моделей [`/Real-Time-Detection/results/models`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/models)
 
-Визуализации прогнозов модели с вероятностями детекции - `/Real-Time-Detection/results/visualizations/model_name/predict`
+Визуализации прогнозов модели с вероятностями детекции - [`/Real-Time-Detection/results/visualizations/yolo8/predict`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/predict)
 
-Визуализации прогнозов модели в сравнении с реальными рамками - `/Real-Time-Detection/results/visualizations/model_name/comparison`
+Визуализации прогнозов модели в сравнении с реальными рамками - [`/Real-Time-Detection/results/visualizations/yolo8/comparison`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/comparison)
 
-Предсказания на видео `/Real-Time-Detection/results/visualizations/model_name/videos`
+Предсказания на видео [`/Real-Time-Detection/results/visualizations/yolo8/videos`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/videos)
 
 ## Методики проведения экспериментов
 
