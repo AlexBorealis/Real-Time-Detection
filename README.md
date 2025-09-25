@@ -43,7 +43,7 @@
 | Обрезанная (prune 0.05) | 0.399   | 0.689     | 0.361  | 0.42 |
 | YOLOv11                 | 0.383   | 0.657     | 0.35   | 0.4  |
 
-(Актуальные значения в ноутбуках `/notebooks/model_name`.)
+(Актуальные значения в ноутбуках [`/notebooks/model_name`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/notebooks/yolo8/train.ipynb).)
 
 ### Визуализации
 - `/results/visualizations/model_name/predict`: Детекции с вероятностями (bounding boxes и scores).
