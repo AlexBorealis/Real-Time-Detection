@@ -15,18 +15,18 @@
 Оценка производительности моделей YOLOv8 для задач детекции объектов в реальном времени на датасете BDD100K, включая базовую модель, оптимизированные версии (обрезка, квантизация) и тестирование на edge-устройствах.
 
 ### Этапы экспериментов
-- **Подготовка данных**: Использование датасета BDD100K. Скачивание изображений (100k images, Labels) и видео (BDD-Attention). Разделение на тренировочную, валидационную и тестовую выборки согласно конфигурации `/Real-Time-Detection/config/datasets/dataset.yaml`.
-- **Предобработка**: Запуск скрипта `preprocess.py` для аугментации, нормализации и подготовки данных. Команда: `pipenv run python -m src.data.preprocess`.
-- **Обучение моделей**: Основной цикл обучения через `train.py`. Параметры: эпохи, learning rate, batch size из `/Real-Time-Detection/config/models/config.yaml`. Команда: `pipenv run python -m src.models.train.train`.
+- **Подготовка данных**: Использование датасета BDD100K. Скачивание изображений (100k images, Labels) и видео (BDD-Attention). Разделение на тренировочную, валидационную и тестовую выборки согласно конфигурации [`/Real-Time-Detection/config/datasets/dataset.yaml`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/config/datasets/bdd100k.yaml).
+- **Предобработка**: Запуск скрипта [`preprocess.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/data/preprocess.py) для аугментации, нормализации и подготовки данных. Команда: `pipenv run python -m src.data.preprocess`.
+- **Обучение моделей**: Основной цикл обучения через [`train.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/train/train.py). Команда: `pipenv run python -m src.models.train.train`.
 - **Оптимизация**: 
-  - Обрезка модели (`pruning.py`) с параметром `prune-amount` (например, 0.05). Команда: `pipenv run python -m src.models.optimization.pruning --model 1 --prune-amount 0.05 --config yolo8_baseline.yaml`.
-  - Квантизация модели (`quantization.py`). Команда: `pipenv run python -m src.models.optimization.quantization --model 1 --config yolo8_baseline.yaml`.
+  - Обрезка модели ([`pruning.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/optimization/pruning.py)) с параметром `prune-amount` (например, 0.05). Команда: `pipenv run python -m src.models.optimization.pruning --model 1 --prune-amount 0.05 --config yolo8_baseline.yaml`.
+  - Квантизация модели ([`quantization.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/optimization/quantization.py)). Команда: `pipenv run python -m src.models.optimization.quantization --model 1 --config yolo8_baseline.yaml`.
 - **Тестирование**: 
-  - Предсказания на изображениях и видео через `predict_image.py` и `predict_video.py`. Метрики: mAP, precision, recall, FPS, IoU. Примеры команд: `pipenv run python -m src.models.test.predict_video --model 1 --config yolo8_baseline.yaml`.
-- **Имитация на edge-устройствах**: Тестирование преобразованной модели (например, в ONNX) через `edge_imitation.py`. Команда: `pipenv run python -m src.models.test.edge_imitation --model 1 --format onnx --config yolo8_baseline.yaml`.
+  - Предсказания на изображениях и видео через [`predict_image.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/test/predict_image.py) и [`predict_video.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/test/predict_video.py). Метрики: mAP, precision, recall, FPS, IoU. Примеры команд: `pipenv run python -m src.models.test.predict_video --model 1 --config yolo8_baseline.yaml`.
+- **Имитация на edge-устройствах**: Тестирование преобразованной модели (например, в ONNX) через [`edge_imitation.py`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/src/models/test/edge_imitation.py). Команда: `pipenv run python -m src.models.test.edge_imitation --model 1 --format onnx --config yolo8_baseline.yaml`.
 
 ### Конфигурации
-Основная конфигурация: `yolo8_baseline.yaml`. Влияет на гиперпараметры обучения, оптимизации и тестирования. Преобразование модели в форматы (например, ONNX) через `transform_model.py`.
+Основная конфигурация: [`yolo8_baseline.yaml`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/config/models/yolo8_baseline.yaml). Влияет на гиперпараметры обучения, оптимизации и тестирования. Преобразование модели в форматы (например, ONNX) через `transform_model.py`.
 
 ### Оборудование
 Эксперименты проводились на GPU/CPU - (8 CPU - AMD Ryzen 7 7435HS; 1 GPU (8 GB) - NVIDIA GEFORCE RTX 4060 с CUDA).
@@ -43,15 +43,15 @@
 | Обрезанная (prune 0.05) | 0.399   | 0.689     | 0.361  | 0.42 |
 | YOLOv11                 | 0.383   | 0.657     | 0.35   | 0.4  |
 
-(Актуальные значения в ноутбуках [`/notebooks/model_name`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/notebooks/yolo8/train.ipynb).)
+(Актуальные значения в ноутбуках: 
+  yolo8 [`/notebooks/yolo8/train`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/notebooks/yolo8/train.ipynb).)
+  yolo8 optimized [`/notebooks/yolo8/train_after_optimization`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/notebooks/yolo8/train_after_optimization.ipynb)
+  yolo11 [`/notebooks/yolo11/train`](https://github.com/AlexBorealis/Real-Time-Detection/blob/master/notebooks/yolo11/train.ipynb)
 
 ### Визуализации
-- `/results/visualizations/model_name/predict`: Детекции с вероятностями (bounding boxes и scores).
-- `/results/visualizations/model_name/comparison`: Сравнение предсказанных и ground truth рамок (IoU визуализация).
-- `/results/visualizations/model_name/videos`: Обработанные видео с детекциями.
-
-### Ноутбуки
-Ноутбуки (.ipynb) с визуализациями и метриками - `/Real-Time-Detection/notebooks/model_name`. Содержат графики обучения (loss curves), confusion matrices и расчеты метрик.
+- [`/results/visualizations/yolo8/predict`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/predict): Детекции с вероятностями (bounding boxes и scores).
+- [`/results/visualizations/yolo8/comparison`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/comparison): Сравнение предсказанных и ground truth рамок (IoU визуализация).
+- [`/results/visualizations/yolo8/videos`](https://github.com/AlexBorealis/Real-Time-Detection/tree/master/results/visualizations/yolo8_baseline/videos): Обработанные видео с детекциями.
 
 ### Выводы
 1) При обучении на датасете BDD100K на протяжении 100 эпох, модели YOLO 8 и 11 версий показывают приблизительно равные результаты по метрикам качества.
