@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized/best_optimized.pt
-data: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/config/datasets/bdd100k.yaml
+model: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized/best_optimized.pt
+data: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/config/datasets/bdd100k.yaml
 epochs: 50
 time: null
 patience: 10
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: '0'
 workers: 8
-project: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized
+project: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized
 name: train3
 exist_ok: false
 pretrained: true
@@ -102,4 +102,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized/train3
+save_dir: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/results/models/yolo8_baseline/optimized/train3
