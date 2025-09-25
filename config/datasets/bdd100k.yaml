@@ -1,5 +1,5 @@
 # Home directory
-path: /home/borealis/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/data/processed
+path: ~/Documents/study/Netology/dll/final_project_dll/Real-Time-Detection/data/processed
 
 # Samples
 train: images/train
